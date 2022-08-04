@@ -1,9 +1,30 @@
+use std::fmt::Display;
+
 #[derive(Eq, Debug, PartialEq, Copy, Clone)]
 pub enum RequestType {
     Get,
     Put,
     Delete,
     Ls,
+}
+
+impl Display for RequestType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RequestType::Get => {
+                write!(f, "GET Request.")
+            }
+            RequestType::Put => {
+                write!(f, "PUT Request.")
+            }
+            RequestType::Delete => {
+                write!(f, "DELETE Request.")
+            }
+            RequestType::Ls => {
+                write!(f, "List all keys.")
+            }
+        }
+    }
 }
 
 pub struct Request {
