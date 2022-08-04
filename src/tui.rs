@@ -1,6 +1,7 @@
 use crate::request::{Request, RequestType};
 use std::io::{self, Write};
 use termion::{
+    color,
     event::{Event, Key},
     input::TermRead,
     raw::IntoRawMode,
@@ -48,6 +49,7 @@ impl SweetUserTui {
                         self.highlighted_selection =
                             self.selections[self.selection_index];
                     }
+                    self.update_screen();
                 }
                 Event::Key(Key::Down) => {
                     if self.selection_index + 1 < self.selections.len() {
@@ -55,6 +57,7 @@ impl SweetUserTui {
                         self.highlighted_selection =
                             self.selections[self.selection_index];
                     }
+                    self.update_screen();
                 }
                 Event::Key(Key::Char('\n')) => {
                     // TODO: Store the highlighted selection as in the Request.
@@ -65,6 +68,17 @@ impl SweetUserTui {
                 _ => {}
             }
             stdout.flush().unwrap();
+        }
+    }
+
+    fn update_screen(&self) {
+        for (i, option) in self.selections.iter().enumerate() {
+            if *option == self.highlighted_selection {
+                println!("{}{}. {}", color::Fg(color::Yellow), i, option);
+                println!("{}", color::Fg(color::Reset));
+                continue;
+            }
+            println!("{}. {}", i, option);
         }
     }
 }
