@@ -1,4 +1,4 @@
-#[derive(Eq, Debug, PartialEq)]
+#[derive(Eq, Debug, PartialEq, Copy, Clone)]
 pub enum RequestType {
     Get,
     Put,

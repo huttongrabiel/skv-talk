@@ -1,8 +1,72 @@
 use crate::request::{Request, RequestType};
-use std::io;
+use std::io::{self, Write};
+use termion::{
+    event::{Event, Key},
+    input::TermRead,
+    raw::IntoRawMode,
+};
 
 pub async fn tui() {
-    basic_tui().await;
+    let mut sut = SweetUserTui::new();
+    sut.sweet_user_tui();
+}
+
+pub struct SweetUserTui {
+    highlighted_selection: RequestType,
+    selection_index: usize,
+    selections: Vec<RequestType>,
+}
+
+impl SweetUserTui {
+    pub fn new() -> Self {
+        let selections = vec![
+            RequestType::Get,
+            RequestType::Put,
+            RequestType::Delete,
+            RequestType::Ls,
+        ];
+        let selection_index = 0;
+        let highlighted_selection = &selections[selection_index];
+
+        Self {
+            highlighted_selection: *highlighted_selection,
+            selection_index,
+            selections,
+        }
+    }
+
+    pub fn sweet_user_tui(&mut self) {
+        let stdin = io::stdin();
+        let mut stdout = io::stdout().into_raw_mode().unwrap();
+
+        for event in stdin.events() {
+            let event = event.unwrap();
+            match event {
+                Event::Key(Key::Up) => {
+                    if self.selection_index >= 1 {
+                        self.selection_index -= 1;
+                        self.highlighted_selection =
+                            self.selections[self.selection_index];
+                    }
+                }
+                Event::Key(Key::Down) => {
+                    if self.selection_index + 1 < self.selections.len() {
+                        self.selection_index += 1;
+                        self.highlighted_selection =
+                            self.selections[self.selection_index];
+                    }
+                }
+                Event::Key(Key::Char('\n')) => {
+                    // TODO: Store the highlighted selection as in the Request.
+                    break;
+                }
+                Event::Key(Key::Ctrl('d')) => break,
+                Event::Key(Key::Ctrl('c')) => break,
+                _ => {}
+            }
+            stdout.flush().unwrap();
+        }
+    }
 }
 
 async fn basic_tui() {
