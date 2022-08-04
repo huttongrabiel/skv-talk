@@ -47,18 +47,22 @@ pub async fn request(
                         .expect("You must provide an encryption key!"),
                 )
                 .send()
-                .await?;
+                .await?
+                .bytes()
+                .await?
         }
         RequestType::Put => {
             client
                 .put(url)
                 .body(request.value.expect("GET request requires value."))
                 .send()
-                .await?;
+                .await?
+                .bytes()
+                .await?
         }
         RequestType::Delete => {
             client
-                .get(url)
+                .delete(url)
                 .header(
                     "key",
                     request
@@ -66,7 +70,9 @@ pub async fn request(
                         .expect("You must provide an encryption key!"),
                 )
                 .send()
-                .await?;
+                .await?
+                .bytes()
+                .await?
         }
         RequestType::Ls => {
             client
@@ -78,10 +84,14 @@ pub async fn request(
                         .expect("You must provide an encryption key!"),
                 )
                 .send()
-                .await?;
+                .await?
+                .bytes()
+                .await?
         }
     };
 
-    eprintln!("res: {:?}", res);
-    Ok(res)
+    // Write the server response out to the user's terminal.
+    println!("{}", String::from_utf8_lossy(&res));
+
+    Ok(())
 }
