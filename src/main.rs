@@ -1,8 +1,8 @@
 use skv_talk::tui::tui;
-use std::error::Error;
 
-fn main() -> Result<(), Box<dyn Error>> {
-    tui();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tui().await;
 
     Ok(())
 }
