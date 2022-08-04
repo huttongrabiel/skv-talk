@@ -26,10 +26,16 @@ async fn basic_tui() {
         _ => RequestType::Ls,
     };
 
+    // Prompt user for key if not making an ls request. We know what the key
+    // will be for an ls request so its easier to not make the user provide it.
     let mut key = String::new();
-    println!("Enter key: ");
-    io::stdin().read_line(&mut key).unwrap();
-    key = key.trim().to_string();
+    if request_type != RequestType::Ls {
+        println!("Enter key: ");
+        io::stdin().read_line(&mut key).unwrap();
+        key = key.trim().to_string();
+    } else {
+        key = "ls".to_string();
+    }
 
     let mut value: Option<String> = None;
     if request_type == RequestType::Put {
