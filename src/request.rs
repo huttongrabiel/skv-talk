@@ -1,4 +1,33 @@
-use crate::tui::{Request, RequestType};
+#[derive(Eq, Debug, PartialEq)]
+pub enum RequestType {
+    Get,
+    Put,
+    Delete,
+    Ls,
+}
+
+pub struct Request {
+    pub request_type: RequestType,
+    pub key: String,
+    pub value: Option<String>,
+    pub encryption_key: Option<String>,
+}
+
+impl Request {
+    pub fn new(
+        request_type: RequestType,
+        key: String,
+        value: Option<String>,
+        encryption_key: Option<String>,
+    ) -> Self {
+        Self {
+            request_type,
+            key,
+            value,
+            encryption_key,
+        }
+    }
+}
 
 pub async fn request(
     request: Request,
@@ -53,5 +82,6 @@ pub async fn request(
         }
     };
 
+    eprintln!("res: {:?}", res);
     Ok(res)
 }

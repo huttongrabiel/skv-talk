@@ -1,36 +1,5 @@
-use crate::request;
+use crate::request::{Request, RequestType};
 use std::io;
-
-#[derive(Eq, Debug, PartialEq)]
-pub enum RequestType {
-    Get,
-    Put,
-    Delete,
-    Ls,
-}
-
-pub struct Request {
-    pub request_type: RequestType,
-    pub key: String,
-    pub value: Option<String>,
-    pub encryption_key: Option<String>,
-}
-
-impl Request {
-    fn new(
-        request_type: RequestType,
-        key: String,
-        value: Option<String>,
-        encryption_key: Option<String>,
-    ) -> Self {
-        Self {
-            request_type,
-            key,
-            value,
-            encryption_key,
-        }
-    }
-}
 
 pub async fn tui() {
     basic_tui().await;
@@ -80,5 +49,5 @@ async fn basic_tui() {
 
     let request = Request::new(request_type, key, value, encryption_key);
 
-    request::request(request).await.unwrap();
+    crate::request::request(request).await.unwrap();
 }
