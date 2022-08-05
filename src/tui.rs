@@ -5,6 +5,7 @@ use termion::{
     event::{Event, Key},
     input::TermRead,
     raw::IntoRawMode,
+    style,
 };
 
 pub async fn tui() {
@@ -40,6 +41,10 @@ impl SweetUserTui {
         let stdin = io::stdin();
         let mut stdout = io::stdout().into_raw_mode().unwrap();
 
+        stdout.suspend_raw_mode().unwrap();
+        self.update_screen();
+        stdout.activate_raw_mode().unwrap();
+
         for event in stdin.events() {
             let event = event.unwrap();
             match event {
@@ -49,7 +54,9 @@ impl SweetUserTui {
                         self.highlighted_selection =
                             self.selections[self.selection_index];
                     }
+                    stdout.suspend_raw_mode().unwrap();
                     self.update_screen();
+                    stdout.activate_raw_mode().unwrap();
                 }
                 Event::Key(Key::Down) => {
                     if self.selection_index + 1 < self.selections.len() {
@@ -57,7 +64,9 @@ impl SweetUserTui {
                         self.highlighted_selection =
                             self.selections[self.selection_index];
                     }
+                    stdout.suspend_raw_mode().unwrap();
                     self.update_screen();
+                    stdout.activate_raw_mode().unwrap();
                 }
                 Event::Key(Key::Char('\n')) => {
                     // TODO: Store the highlighted selection as in the Request.
@@ -72,10 +81,18 @@ impl SweetUserTui {
     }
 
     fn update_screen(&self) {
-        for (i, option) in self.selections.iter().enumerate() {
+        print!("{}", termion::clear::All);
+        for (mut i, option) in self.selections.iter().enumerate() {
+            i += 1;
             if *option == self.highlighted_selection {
-                println!("{}{}. {}", color::Fg(color::Yellow), i, option);
-                println!("{}", color::Fg(color::Reset));
+                println!(
+                    "{}{}{}. {}",
+                    style::Underline,
+                    color::Fg(color::Yellow),
+                    i,
+                    option
+                );
+                print!("{}{}", color::Fg(color::Reset), style::Reset);
                 continue;
             }
             println!("{}. {}", i, option);
