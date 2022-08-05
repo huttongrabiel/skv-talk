@@ -10,7 +10,7 @@ use termion::{
 
 pub async fn tui() {
     let mut sut = SweetUserTui::new();
-    sut.sweet_user_tui();
+    sut.run_tui();
 }
 
 pub struct SweetUserTui {
@@ -37,7 +37,11 @@ impl SweetUserTui {
         }
     }
 
-    pub fn sweet_user_tui(&mut self) {
+    pub fn run_tui(&mut self) {
+        self.request_selection_menu();
+    }
+
+    fn request_selection_menu(&mut self) {
         let stdin = io::stdin();
         let mut stdout = io::stdout().into_raw_mode().unwrap();
 
@@ -82,6 +86,7 @@ impl SweetUserTui {
 
     fn update_screen(&self) {
         print!("{}", termion::clear::All);
+        print!("{}", termion::cursor::Goto(1, 1));
         for (mut i, option) in self.selections.iter().enumerate() {
             i += 1;
             if *option == self.highlighted_selection {
