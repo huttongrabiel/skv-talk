@@ -47,7 +47,7 @@ impl<'a> Tui<'a> {
         let mut stdout = io::stdout().into_raw_mode().unwrap();
 
         stdout.suspend_raw_mode().unwrap();
-        self.update_screen();
+        self.update_selection_menu();
         stdout.activate_raw_mode().unwrap();
 
         for event in stdin.events() {
@@ -60,7 +60,7 @@ impl<'a> Tui<'a> {
                             self.menu_options[self.selection_index];
                     }
                     stdout.suspend_raw_mode().unwrap();
-                    self.update_screen();
+                    self.update_selection_menu();
                     stdout.activate_raw_mode().unwrap();
                 }
                 Event::Key(Key::Down) => {
@@ -70,7 +70,7 @@ impl<'a> Tui<'a> {
                             self.menu_options[self.selection_index];
                     }
                     stdout.suspend_raw_mode().unwrap();
-                    self.update_screen();
+                    self.update_selection_menu();
                     stdout.activate_raw_mode().unwrap();
                 }
                 Event::Key(Key::Char('\n')) => {
@@ -85,7 +85,7 @@ impl<'a> Tui<'a> {
         }
     }
 
-    fn update_screen(&self) {
+    fn update_selection_menu(&self) {
         print!("{}", termion::clear::All);
         print!("{}", termion::cursor::Goto(1, 1));
         for (mut i, option) in self.menu_options.iter().enumerate() {
