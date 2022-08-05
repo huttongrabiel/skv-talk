@@ -9,31 +9,32 @@ use termion::{
 };
 
 pub async fn tui() {
-    let mut sut = SweetUserTui::new();
+    let menu_options = vec![
+        RequestType::Get,
+        RequestType::Put,
+        RequestType::Delete,
+        RequestType::Ls,
+    ];
+
+    let mut sut = Tui::new(&menu_options);
     sut.run_tui();
+    sut.request().await;
 }
 
-pub struct SweetUserTui {
-    highlighted_selection: RequestType,
+pub struct Tui<'a> {
+    current_selection: RequestType,
     selection_index: usize,
-    selections: Vec<RequestType>,
+    menu_options: &'a Vec<RequestType>,
 }
 
-impl SweetUserTui {
-    pub fn new() -> Self {
-        let selections = vec![
-            RequestType::Get,
-            RequestType::Put,
-            RequestType::Delete,
-            RequestType::Ls,
-        ];
+impl<'a> Tui<'a> {
+    pub fn new(menu_options: &'a Vec<RequestType>) -> Self {
         let selection_index = 0;
-        let highlighted_selection = &selections[selection_index];
-
+        let highlighted_selection = &menu_options[selection_index];
         Self {
-            highlighted_selection: *highlighted_selection,
+            current_selection: *highlighted_selection,
             selection_index,
-            selections,
+            menu_options,
         }
     }
 
@@ -55,18 +56,18 @@ impl SweetUserTui {
                 Event::Key(Key::Up) => {
                     if self.selection_index >= 1 {
                         self.selection_index -= 1;
-                        self.highlighted_selection =
-                            self.selections[self.selection_index];
+                        self.current_selection =
+                            self.menu_options[self.selection_index];
                     }
                     stdout.suspend_raw_mode().unwrap();
                     self.update_screen();
                     stdout.activate_raw_mode().unwrap();
                 }
                 Event::Key(Key::Down) => {
-                    if self.selection_index + 1 < self.selections.len() {
+                    if self.selection_index + 1 < self.menu_options.len() {
                         self.selection_index += 1;
-                        self.highlighted_selection =
-                            self.selections[self.selection_index];
+                        self.current_selection =
+                            self.menu_options[self.selection_index];
                     }
                     stdout.suspend_raw_mode().unwrap();
                     self.update_screen();
@@ -87,9 +88,9 @@ impl SweetUserTui {
     fn update_screen(&self) {
         print!("{}", termion::clear::All);
         print!("{}", termion::cursor::Goto(1, 1));
-        for (mut i, option) in self.selections.iter().enumerate() {
+        for (mut i, option) in self.menu_options.iter().enumerate() {
             i += 1;
-            if *option == self.highlighted_selection {
+            if *option == self.current_selection {
                 println!(
                     "{}{}{}. {}",
                     style::Underline,
@@ -103,57 +104,41 @@ impl SweetUserTui {
             println!("{}. {}", i, option);
         }
     }
-}
 
-async fn basic_tui() {
-    let mut request_type = String::new();
+    async fn request(&self) {
+        let request_type = self.current_selection;
+        print!("{}", termion::clear::All);
+        print!("{}", termion::cursor::Goto(1, 1));
 
-    while request_type != "get"
-        && request_type != "put"
-        && request_type != "delete"
-        && request_type != "ls"
-    {
-        println!("Select a request (GET, PUT, DELETE, ls): ");
-        io::stdin().read_line(&mut request_type).unwrap();
-        request_type = request_type.trim().to_string().to_lowercase();
+        // Prompt user for key if not making an ls request. We know what the key
+        // will be for an ls request so its easier to not make the user provide it.
+        let mut key = String::new();
+        if request_type != RequestType::Ls {
+            println!("Enter key: ");
+            io::stdin().read_line(&mut key).unwrap();
+            key = key.trim().to_string();
+        } else {
+            key = "ls".to_string();
+        }
+
+        let mut value: Option<String> = None;
+        if request_type == RequestType::Put {
+            let mut buf = String::new();
+            println!("Enter value: ");
+            io::stdin().read_line(&mut buf).unwrap();
+            value = Some(buf.trim().to_string());
+        }
+
+        let mut encryption_key: Option<String> = None;
+        if request_type != RequestType::Put {
+            let mut buf = String::new();
+            println!("Enter server provided encryption key: ");
+            io::stdin().read_line(&mut buf).unwrap();
+            encryption_key = Some(buf.trim().to_string());
+        }
+
+        let request = Request::new(request_type, key, value, encryption_key);
+
+        crate::request::request(request).await.unwrap();
     }
-
-    let request_type = match request_type.to_lowercase().as_str() {
-        "get" => RequestType::Get,
-        "put" => RequestType::Put,
-        "delete" => RequestType::Delete,
-        "ls" => RequestType::Ls,
-        _ => RequestType::Ls,
-    };
-
-    // Prompt user for key if not making an ls request. We know what the key
-    // will be for an ls request so its easier to not make the user provide it.
-    let mut key = String::new();
-    if request_type != RequestType::Ls {
-        println!("Enter key: ");
-        io::stdin().read_line(&mut key).unwrap();
-        key = key.trim().to_string();
-    } else {
-        key = "ls".to_string();
-    }
-
-    let mut value: Option<String> = None;
-    if request_type == RequestType::Put {
-        let mut buf = String::new();
-        println!("Enter value: ");
-        io::stdin().read_line(&mut buf).unwrap();
-        value = Some(buf.trim().to_string());
-    }
-
-    let mut encryption_key: Option<String> = None;
-    if request_type != RequestType::Put {
-        let mut buf = String::new();
-        println!("Enter server provided encryption key: ");
-        io::stdin().read_line(&mut buf).unwrap();
-        encryption_key = Some(buf.trim().to_string());
-    }
-
-    let request = Request::new(request_type, key, value, encryption_key);
-
-    crate::request::request(request).await.unwrap();
 }
