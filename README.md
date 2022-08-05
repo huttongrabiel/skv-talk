@@ -2,6 +2,8 @@
 
 A user friendly way of interacting with skv, a simple networked key-value store.
 
+![SKV-Talk Demo](https://j.gifs.com/OgRkRE.gif)
+
 # Installation
 
 # Usage
