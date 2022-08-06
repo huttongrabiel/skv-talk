@@ -18,7 +18,7 @@ pub async fn tui() {
 
     let mut sut = Tui::new(&menu_options);
     sut.run_tui();
-    sut.request().await;
+    sut.collect_request_information().await;
 }
 
 pub struct Tui<'a> {
@@ -105,13 +105,14 @@ impl<'a> Tui<'a> {
         }
     }
 
-    async fn request(&self) {
+    async fn collect_request_information(&self) {
         let request_type = self.current_selection;
         print!("{}", termion::clear::All);
         print!("{}", termion::cursor::Goto(1, 1));
 
         // Prompt user for key if not making an ls request. We know what the key
-        // will be for an ls request so its easier to not make the user provide it.
+        // will be for an ls request so its easier to not make the user provide
+        // it.
         let mut key = String::new();
         if request_type != RequestType::Ls {
             println!("Enter key: ");
