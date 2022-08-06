@@ -48,71 +48,74 @@ impl Request {
             encryption_key,
         }
     }
-}
 
-pub async fn request(
-    request: Request,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let client = reqwest::Client::new();
+    pub async fn execute(&self) -> Result<(), Box<dyn std::error::Error>> {
+        let client = reqwest::Client::new();
 
     let url = format!("http://localhost:3400/{}", request.key);
 
-    let res = match request.request_type {
-        RequestType::Get => {
-            client
-                .get(url)
-                .header(
-                    "key",
-                    request
-                        .encryption_key
-                        .expect("You must provide an encryption key!"),
-                )
-                .send()
-                .await?
-                .bytes()
-                .await?
-        }
-        RequestType::Put => {
-            client
-                .put(url)
-                .body(request.value.expect("GET request requires value."))
-                .send()
-                .await?
-                .bytes()
-                .await?
-        }
-        RequestType::Delete => {
-            client
-                .delete(url)
-                .header(
-                    "key",
-                    request
-                        .encryption_key
-                        .expect("You must provide an encryption key!"),
-                )
-                .send()
-                .await?
-                .bytes()
-                .await?
-        }
-        RequestType::Ls => {
-            client
-                .get(url)
-                .header(
-                    "key",
-                    request
-                        .encryption_key
-                        .expect("You must provide an encryption key!"),
-                )
-                .send()
-                .await?
-                .bytes()
-                .await?
-        }
-    };
+        let res = match self.request_type {
+            RequestType::Get => {
+                client
+                    .get(url)
+                    .header(
+                        "key",
+                        self.encryption_key
+                            .as_ref()
+                            .expect("You must provide an encryption key!"),
+                    )
+                    .send()
+                    .await?
+                    .bytes()
+                    .await?
+            }
+            RequestType::Put => {
+                client
+                    .put(url)
+                    .body(
+                        self.value
+                            .as_ref()
+                            .expect("You must provide a value!")
+                            .to_string(),
+                    )
+                    .send()
+                    .await?
+                    .bytes()
+                    .await?
+            }
+            RequestType::Delete => {
+                client
+                    .delete(url)
+                    .header(
+                        "key",
+                        self.encryption_key
+                            .as_ref()
+                            .expect("You must provide an encryption key!"),
+                    )
+                    .send()
+                    .await?
+                    .bytes()
+                    .await?
+            }
+            RequestType::Ls => {
+                client
+                    .get(url)
+                    .header(
+                        "key",
+                        self.encryption_key
+                            .as_ref()
+                            .expect("You must provide an encryption key!"),
+                    )
+                    .send()
+                    .await?
+                    .bytes()
+                    .await?
+            }
+        };
 
-    // Write the server response out to the user's terminal.
-    println!("{}", String::from_utf8_lossy(&res));
+        // Write the server response out to the user's terminal.
+        println!("{}", String::from_utf8_lossy(&res));
 
-    Ok(())
+        Ok(())
+    }
 }

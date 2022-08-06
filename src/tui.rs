@@ -138,8 +138,8 @@ impl<'a> Tui<'a> {
             encryption_key = Some(buf.trim().to_string());
         }
 
-        let request = Request::new(request_type, key, value, encryption_key);
-
-        crate::request::request(request).await.unwrap();
+        let request =
+            Request::new(request_type, key, value, port, encryption_key);
+        request.execute().await.unwrap();
     }
 }
