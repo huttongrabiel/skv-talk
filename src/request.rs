@@ -27,10 +27,12 @@ impl Display for RequestType {
     }
 }
 
+#[derive(Debug)]
 pub struct Request {
     pub request_type: RequestType,
     pub key: String,
     pub value: Option<String>,
+    pub port: String,
     pub encryption_key: Option<String>,
 }
 
@@ -39,12 +41,14 @@ impl Request {
         request_type: RequestType,
         key: String,
         value: Option<String>,
+        port: String,
         encryption_key: Option<String>,
     ) -> Self {
         Self {
             request_type,
             key,
             value,
+            port,
             encryption_key,
         }
     }
@@ -52,7 +56,7 @@ impl Request {
     pub async fn execute(&self) -> Result<(), Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
 
-    let url = format!("http://localhost:3400/{}", request.key);
+        let url = format!("http://localhost:{}/{}", self.port, self.key);
 
         let res = match self.request_type {
             RequestType::Get => {

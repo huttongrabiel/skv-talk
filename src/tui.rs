@@ -110,6 +110,14 @@ impl<'a> Tui<'a> {
         print!("{}", termion::clear::All);
         print!("{}", termion::cursor::Goto(1, 1));
 
+        let mut port = String::from("3400");
+        let mut user_port = String::new();
+        println!("Enter port [default = 3400]: ");
+        io::stdin().read_line(&mut user_port).unwrap();
+        if !user_port.trim().is_empty() {
+            port = user_port;
+        }
+
         // Prompt user for key if not making an ls request. We know what the key
         // will be for an ls request so its easier to not make the user provide
         // it.
