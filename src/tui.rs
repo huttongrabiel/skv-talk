@@ -53,26 +53,14 @@ impl<'a> Tui<'a> {
         for event in stdin.events() {
             let event = event.unwrap();
             match event {
-                Event::Key(Key::Up) => {
+                Event::Key(Key::Up) | Event::Key(Key::Ctrl('p')) => {
                     self.move_selection_up();
                     stdout.suspend_raw_mode().unwrap();
                     self.update_selection_menu();
                     stdout.activate_raw_mode().unwrap();
                 }
-                Event::Key(Key::Down) => {
+                Event::Key(Key::Down) | Event::Key(Key::Ctrl('n')) => {
                     self.move_selection_down();
-                    stdout.suspend_raw_mode().unwrap();
-                    self.update_selection_menu();
-                    stdout.activate_raw_mode().unwrap();
-                }
-                Event::Key(Key::Ctrl('n')) => {
-                    self.move_selection_down();
-                    stdout.suspend_raw_mode().unwrap();
-                    self.update_selection_menu();
-                    stdout.activate_raw_mode().unwrap();
-                }
-                Event::Key(Key::Ctrl('p')) => {
-                    self.move_selection_up();
                     stdout.suspend_raw_mode().unwrap();
                     self.update_selection_menu();
                     stdout.activate_raw_mode().unwrap();
