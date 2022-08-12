@@ -54,34 +54,49 @@ impl<'a> Tui<'a> {
             let event = event.unwrap();
             match event {
                 Event::Key(Key::Up) => {
-                    if self.selection_index >= 1 {
-                        self.selection_index -= 1;
-                        self.current_selection =
-                            self.menu_options[self.selection_index];
-                    }
+                    self.move_selection_up();
                     stdout.suspend_raw_mode().unwrap();
                     self.update_selection_menu();
                     stdout.activate_raw_mode().unwrap();
                 }
                 Event::Key(Key::Down) => {
-                    if self.selection_index + 1 < self.menu_options.len() {
-                        self.selection_index += 1;
-                        self.current_selection =
-                            self.menu_options[self.selection_index];
-                    }
+                    self.move_selection_down();
                     stdout.suspend_raw_mode().unwrap();
                     self.update_selection_menu();
                     stdout.activate_raw_mode().unwrap();
                 }
-                Event::Key(Key::Char('\n')) => {
-                    // TODO: Store the highlighted selection as in the Request.
-                    break;
+                Event::Key(Key::Ctrl('n')) => {
+                    self.move_selection_down();
+                    stdout.suspend_raw_mode().unwrap();
+                    self.update_selection_menu();
+                    stdout.activate_raw_mode().unwrap();
                 }
+                Event::Key(Key::Ctrl('p')) => {
+                    self.move_selection_up();
+                    stdout.suspend_raw_mode().unwrap();
+                    self.update_selection_menu();
+                    stdout.activate_raw_mode().unwrap();
+                }
+                Event::Key(Key::Char('\n')) => break,
                 Event::Key(Key::Ctrl('d')) => break,
                 Event::Key(Key::Ctrl('c')) => break,
                 _ => {}
             }
             stdout.flush().unwrap();
+        }
+    }
+
+    fn move_selection_down(&mut self) {
+        if self.selection_index + 1 < self.menu_options.len() {
+            self.selection_index += 1;
+            self.current_selection = self.menu_options[self.selection_index];
+        }
+    }
+
+    fn move_selection_up(&mut self) {
+        if self.selection_index >= 1 {
+            self.selection_index -= 1;
+            self.current_selection = self.menu_options[self.selection_index];
         }
     }
 
