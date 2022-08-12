@@ -108,12 +108,8 @@ impl<'a> Tui<'a> {
         }
     }
 
-    async fn collect_request_information(&self) {
-        let request_type = self.current_selection;
-        print!("{}", termion::clear::All);
-        print!("{}", termion::cursor::Goto(1, 1));
-
-        match request_type {
+    fn display_current_request(&self) {
+        match self.current_selection {
             RequestType::Ls => {
                 println!(
                     "{}Ls Request{}",
@@ -143,6 +139,14 @@ impl<'a> Tui<'a> {
                 );
             }
         }
+    }
+
+    async fn collect_request_information(&self) {
+        let request_type = self.current_selection;
+        print!("{}", termion::clear::All);
+        print!("{}", termion::cursor::Goto(1, 1));
+
+        self.display_current_request();
 
         let mut port = String::from("3400");
         let mut user_port = String::new();
