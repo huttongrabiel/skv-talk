@@ -125,6 +125,37 @@ impl<'a> Tui<'a> {
         print!("{}", termion::clear::All);
         print!("{}", termion::cursor::Goto(1, 1));
 
+        match request_type {
+            RequestType::Ls => {
+                println!(
+                    "{}Ls Request{}",
+                    color::Fg(color::Red),
+                    color::Fg(color::Reset)
+                );
+            }
+            RequestType::Get => {
+                println!(
+                    "{}GET Request{}",
+                    color::Fg(color::Red),
+                    color::Fg(color::Reset)
+                );
+            }
+            RequestType::Put => {
+                println!(
+                    "{}PUT Request{}",
+                    color::Fg(color::Red),
+                    color::Fg(color::Reset)
+                );
+            }
+            RequestType::Delete => {
+                println!(
+                    "{}DELETE Request{}",
+                    color::Fg(color::Red),
+                    color::Fg(color::Reset)
+                );
+            }
+        }
+
         let mut port = String::from("3400");
         let mut user_port = String::new();
         println!("Enter port [default = 3400]: ");
