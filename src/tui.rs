@@ -148,12 +148,19 @@ impl<'a> Tui<'a> {
 
         self.display_current_request();
 
+        let mut should_specify_port = String::new();
+        println!("Do you want to specify the port? [default = 3400] (y/N):");
+        io::stdin().read_line(&mut should_specify_port).unwrap();
+        let should_specify_port = should_specify_port.trim().to_lowercase();
+
         let mut port = String::from("3400");
-        let mut user_port = String::new();
-        println!("Enter port [default = 3400]: ");
-        io::stdin().read_line(&mut user_port).unwrap();
-        if !user_port.trim().is_empty() {
-            port = user_port;
+        if should_specify_port == "y" || should_specify_port == "yes" {
+            let mut user_port = String::new();
+            println!("Enter port [default = 3400]: ");
+            io::stdin().read_line(&mut user_port).unwrap();
+            if !user_port.trim().is_empty() {
+                port = user_port;
+            }
         }
 
         // Prompt user for key if not making an ls request. We know what the key
